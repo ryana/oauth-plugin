@@ -33,7 +33,14 @@ module Oauth
       def callback
         @request_token_secret=session[params[:oauth_token]]
         if @request_token_secret
-          @token=@consumer.create_from_request_token(current_user,params[:oauth_token],@request_token_secret,params[:oauth_verifier])
+          @token=@consumer.build_from_request_token(current_user,params[:oauth_token],@request_token_secret,params[:oauth_verifier])
+          if current_user
+            @token.save
+          else
+            session[:oauth_tokens] ||= {}
+            session[:oauth_tokens][:id] = @token
+          end
+
           if @token
             flash[:notice] = "#{params[:id].humanize} was successfully connected to your account"
             go_back

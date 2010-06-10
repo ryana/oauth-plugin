@@ -31,13 +31,21 @@ module Oauth
           end
 
           def create_from_request_token(user,token,secret,oauth_verifier)
+            returning (build_from_request_token(user, token, secret, oauth_verifier)) {|t| t.save}
+          end
+
+          def build_from_request_token(user, token, secret, oauth_verifier)
+            access_token = get_access_token_from_request_token(token, secret, oauth_verifier)
+            build :user_id=>user.try(:id),:token=>access_token.token,:secret=>access_token.secret
+          end
+
+          def get_access_token_from_request_token(token, secret, oauth_verifier)
             request_token=OAuth::RequestToken.new consumer,token,secret
             options={}
             options[:oauth_verifier]=oauth_verifier if oauth_verifier
-            access_token=request_token.get_access_token options
-            create :user_id=>user.id,:token=>access_token.token,:secret=>access_token.secret
+            request_token.get_access_token options
           end
-          
+
           protected
           
           def credentials
