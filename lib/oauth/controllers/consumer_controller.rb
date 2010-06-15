@@ -38,7 +38,7 @@ module Oauth
             @token.save
           else
             session[:oauth_tokens] ||= {}
-            session[:oauth_tokens][:id] = @token
+            session[:oauth_tokens][params[:id]] = @token
           end
 
           if @token
